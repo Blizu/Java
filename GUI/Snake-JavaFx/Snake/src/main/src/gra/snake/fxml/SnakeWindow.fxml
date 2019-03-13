@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.Blend?>
+<?import javafx.scene.layout.Pane?>
+
+<Pane fx:id="paneright" maxHeight="300.0" maxWidth="300.0" minHeight="304.0" minWidth="600.0" prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Pane fx:id="panePlay" layoutX="2.0" layoutY="2.0" maxHeight="300.0" maxWidth="400.0" minHeight="300.0" minWidth="400.0" prefHeight="400.0" prefWidth="300.0">
+         <children>
+            <Canvas fx:id="canvas" height="300.0" width="400.0" />
+         </children></Pane>
+      <Label alignment="CENTER" layoutX="398.0" layoutY="265.0" prefHeight="25.0" prefWidth="202.0" style="-fx-font-size: 16;" text="Wyjście  z Gry - CTRL + R" textFill="WHITE" textOverrun="CENTER_ELLIPSIS">
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <effect>
+            <Blend />
+         </effect></Label>
+      <Label fx:id="score" layoutX="493.0" layoutY="49.0" style="-fx-font-size: 16;" text="0" textFill="WHITE" />
+      <Label layoutX="472.0" layoutY="14.0" style="-fx-font-size: 16;" text="Punkty" textFill="WHITE" />
+      <Label layoutX="455.0" layoutY="80.0" style="-fx-font-size: 16;" text="Pozostały czas" textFill="WHITE" />
+      <Label fx:id="time" layoutX="497.0" layoutY="105.0" style="-fx-font-size: 16;" text="0" textFill="WHITE" />
+   </children>
+</Pane>
