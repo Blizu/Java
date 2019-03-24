@@ -1,10 +1,4 @@
-/**
- *
- *  @author Bliżewski Piotr S16710
- *
- */
-
-package zad1;
+﻿package zad1;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
