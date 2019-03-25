@@ -1,4 +1,5 @@
 ﻿
+
 package zad3;
 
 import java.nio.file.Files;
@@ -8,56 +9,50 @@ import java.util.stream.Collectors;
 import java.io.IOException;
 import java.util.function.Function;
 
-
 public class Anagrams {
-	
-    List<String> resultFileRead = new ArrayList<>();
-    List<String> inputList = new ArrayList<>();
-    List<List<String>> outputList = new ArrayList<>();
 
-    public Anagrams(String allWords) {
+	List<String> inputList = new ArrayList<>();
+	List<List<String>> outputList = new ArrayList<>();
+	List<String> resultFileRead = new ArrayList<>();
 
-        try {
-            List<String> readFileList = Files.readAllLines(Paths.get(allWords));
+	public Anagrams(String allWords) {
 
-            for (String line : readFileList)
-                resultFileRead.add(line);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		try {
+			List<String> readFromFile = Files.readAllLines(Paths.get(allWords));
 
-        for (String s : resultFileRead)
-            inputList.addAll(Arrays.asList(s.split(" ")));
-    }
+			for (String line : readFromFile)
+				resultFileRead.add(line);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-    public List<List<String>> getSortedByAnQty() {
-        Function<String, String> sortingChars = s -> {
-                                              char [] chars = s.toCharArray();
-                                              Arrays.sort(chars);
-                                              return String.valueOf(chars);
-                                             };
+		for (String s : resultFileRead)
+			inputList.addAll(Arrays.asList(s.split(" ")));
+	}
 
+	public List<List<String>> getSortedByAnQty() {
+		Function<String, String> returnSortedWordCharsList = word -> {
+			char[] charTab = word.toCharArray();
+			Arrays.sort(charTab);
+			return new String(charTab);
+		};
 
+		Map<String, List<String>> wordToAnagramsMap = inputList.stream().collect(Collectors
+				.groupingBy(returnSortedWordCharsList, Collectors.mapping(word -> word, Collectors.toList())));
 
-        Map<String, List<String>> sortingResult = inputList.stream()
-                .collect(Collectors.groupingBy(sortingChars, Collectors.mapping(s -> s, Collectors.toList())));
+		outputList = new ArrayList<>(wordToAnagramsMap.values());
+		outputList.sort((string1, string2) -> string2.size() - string1.size());
 
-            outputList = new ArrayList<>(sortingResult.values());
-            outputList.sort((s1, s2) -> s2.size() - s1.size());
+		return outputList;
+	}
 
-        return outputList;
-    }
+	public String getAnagramsFor(String word) {
+		String result = word + ": [";
 
-    public String getAnagramsFor(String word) {
-        String matchedResults = word + ": [";
+		result += outputList.stream().filter(w -> w.contains(word)).flatMap(Collection::stream)
+				.filter(w -> !(w.equals(word))).collect(Collectors.joining(", "));
 
-        matchedResults += outputList.stream().filter(s -> s.contains(word))
-                .flatMap(Collection::stream)
-                .filter(s -> !(s.equals(word)))
-                .collect(Collectors.joining(", "));
-
-        matchedResults += "]";
-        return matchedResults;
-    }
-
+		result += "]";
+		return result;
+	}
 }
