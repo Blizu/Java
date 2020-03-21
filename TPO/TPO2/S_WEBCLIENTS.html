@@ -1,0 +1,15 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1250"><title>S_WEBCLIENTS</title></head>
+<body><h2>Zadanie: klienci usług sieciowych</h2>Napisać aplikację, udostępniającą GUI, w którym po podanu miasta i nazwy kraju pokazywane są:<br><ol><li>Informacje o aktualnej pogodzie w tym mieście.</li><li>Informacje o kursie wymiany walutu kraju wobec&nbsp;podanej przez uzytkownika waluty.</li><li>Informacje o kursie NBP złotego wobec tej waluty podanego kraju.</li><li>Strona wiki z opisem miasta.</li></ol>W
+p. 1 użyć serwisu api.openweathermap.org, w p. 2 - serwisu&nbsp;exchangeratesapi.io, w p. 3 - informacji ze stron NBP:
+http://www.nbp.pl/kursy/kursya.html i
+http://www.nbp.pl/kursy/kursyb.html.<br>W p. 4 użyć klasy WebEngine z JavaFX dla wbudowania przeglądarki w aplikację Swingową.<br><br>Program winien zawierać klasę Service z konstruktorem <span style="font-weight: bold;">Service(String kraj)</span> i&nbsp;metodami::<br><ul><li>String
+getWeather(String miasto) - zwraca informację o pogodzie w podanym
+mieście danego kraju&nbsp;w formacie JSON (to ma być pełna informacja
+uzyskana z serwisu openweather - po prostu tekst w formacie JSON),</li><li>Double getRateFor(String kod_waluty) - zwraca kurs waluty danego kraju wobec waluty podanej jako argument,</li><li>Double getNBPRate() - zwraca kurs złotego wobec waluty danego kraju</li></ul>Następujące przykładowa klasa &nbsp;pokazuje możliwe użycie tych metod:<br><pre>public class Main {<br>  public static void main(String[] args) {<br>    Service s = new Service("Poland");<br>    String weatherJson = s.getWeather("Warsaw");<br>    Double rate1 = s.getRateFor("USD");<br>    Double rate2 = s.getNBPRate();<br>    // ...<br>    // część uruchamiająca GUI<br>  }<br>}<br><br></pre><span style="font-weight: bold;">Uwaga 1: zdefiniowanie pokazanych metod w sposób niezalezny od GUI jest obowiązkowe.</span><br><span style="font-weight: bold;">Uwaga 2</span>:
+&nbsp;W katalogu projektu (np. w podkatalogu lib) nalezy umiescic
+wykorzystywane&nbsp;JARy (w przeciwnym razie program nie przejdzie
+kompilacji) i skonfigurowac Build Path tak, by wskazania na te JARy
+byly w Build Path zawarte.<br><br>
+</body></html>
