@@ -4,14 +4,17 @@ import javafx.util.Pair;
 import java.net.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Service {
 
     private String nazwaKraju;
+    private String currency;
 
     public Service(String string) {
-
             this.nazwaKraju = string;
+            this.currency = "PLN";
     }
 
     public Pair<String, Integer> getHttpResponse(String requestUrl) throws IOException {
@@ -62,10 +65,24 @@ public class Service {
             e.printStackTrace();
             return null;
         }
-
     }
 
-    public Double getRateFor(String usd) {
+    public Double getRateFor(String base) {
+        String request_url = "https://api.exchangeratesapi.io/latest?base=" + base + "&symbols=" + this.currency;
+        try {
+            Pair<String, Integer> response = getHttpResponse(request_url);
+            String responseString = response.getKey();
+            Integer returnCode = response.getValue();
+
+            Pattern p = Pattern.compile(".*" + this.currency + "\\\":([0-9]+\\.[0-9]+)}.*");
+            Matcher m = p.matcher(responseString);
+            boolean b = m.matches();
+            String value = m.group(1);
+
+            return new Double(value);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
