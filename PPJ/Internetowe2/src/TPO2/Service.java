@@ -14,7 +14,44 @@ public class Service {
 
     public Service(String string) {
             this.nazwaKraju = string;
-            this.currency = "PLN";
+            this.currency = getCurrencyForCountry(nazwaKraju);
+    }
+
+    public String getCurrencyForCountry(String nazwaKraju){
+
+        String urlAddressCountryCode = "https://supply-xml.booking.com/hotels/xml/countries";
+
+
+        try {
+            Pair<String, Integer> responseCountryCode = getHttpResponse(urlAddressCountryCode);
+            String responseStringA = responseCountryCode.getKey();
+            Integer returnCodeA = responseCountryCode.getValue();
+
+            checkReturnCode(returnCodeA, responseStringA);
+
+            Pattern p = Pattern.compile("countrycode=\"(\\w+)\" name=\"" + this.nazwaKraju + "\"\\/>");
+            Matcher m = p.matcher(responseStringA);
+            boolean b = m.find();
+            String valueofCountryCode = m.group(1).toLowerCase();
+
+            String urlAddressCountryCurrencies="https://supply-xml.booking.com/hotels/xml/countrycurrencies";
+            Pair<String, Integer> responseCurrency = getHttpResponse(urlAddressCountryCurrencies);
+            String responseStringB = responseCurrency.getKey();
+
+            Integer returnCodeB = responseCurrency.getValue();
+            checkReturnCode(returnCodeB, responseStringB);
+
+            Pattern p2 = Pattern.compile("countrycode=\""+valueofCountryCode+"\" currencycode=\"(\\w+)\"");
+            Matcher m2 = p2.matcher(responseStringB);
+            boolean b2 = m2.find();
+
+            return m2.group(1);
+
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public Pair<String, Integer> getHttpResponse(String requestUrl) throws IOException {
@@ -22,7 +59,6 @@ public class Service {
             URL url = new URL(requestUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
-            con.setRequestProperty("Accept", "application/json");
             con.setDoOutput(true);
 
             int returnCode = con.getResponseCode();
@@ -45,19 +81,25 @@ public class Service {
         }
     }
 
+    public void checkReturnCode (Integer returnCode, String message){
+        if (returnCode>206  || returnCode < 200 ){
+            throw new RuntimeException("Bad server response:\n" + message);
+        }
+    }
+
     public String getWeather(String nazwaMiasta) throws CityNotFoundException{
         try {
-            String url_addres = "http://api.openweathermap.org/data/2.5/weather";
-            String api_key = "accd201c204ec0acc1f89ecd91e01538";
-            String request_url = url_addres + "?q=" + nazwaMiasta + "&appid=" + api_key;
-            Pair<String, Integer> response = getHttpResponse(request_url);
+            String urlAddres = "http://api.openweathermap.org/data/2.5/weather";
+            String apiKey = "accd201c204ec0acc1f89ecd91e01538";
+            String requestUrl = urlAddres + "?q=" + nazwaMiasta + "&appid=" + apiKey;
+            Pair<String, Integer> response = getHttpResponse(requestUrl);
             String responseString = response.getKey();
             Integer returnCode = response.getValue();
 
             if (returnCode == 404 && responseString.contains("city not found")){
                 throw new CityNotFoundException();
-            } else if (returnCode > 206 || returnCode < 200 ){
-                throw new RuntimeException("Bad server response:\n" + responseString);
+            } else {
+                checkReturnCode(returnCode, responseString);
             }
 
             return responseString;
@@ -68,11 +110,17 @@ public class Service {
     }
 
     public Double getRateFor(String base) {
-        String request_url = "https://api.exchangeratesapi.io/latest?base=" + base + "&symbols=" + this.currency;
+        String requestUrl = "https://api.exchangeratesapi.io/latest?base=" + base + "&symbols=" + this.currency;
         try {
-            Pair<String, Integer> response = getHttpResponse(request_url);
+            Pair<String, Integer> response = getHttpResponse(requestUrl);
             String responseString = response.getKey();
             Integer returnCode = response.getValue();
+
+            if (returnCode == 400 && responseString.contains(base)){
+                throw new CurrencyNotFoundException();
+            } else {
+                checkReturnCode(returnCode, responseString);
+            }
 
             Pattern p = Pattern.compile(".*" + this.currency + "\\\":([0-9]+\\.[0-9]+)}.*");
             Matcher m = p.matcher(responseString);
@@ -80,13 +128,45 @@ public class Service {
             String value = m.group(1);
 
             return new Double(value);
+
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     public Double getNBPRate() {
+        if (this.currency.equals("PLN")){
+            return 1.0;
+        }
+
+        String requestUrlTabA = "http://www.nbp.pl/kursy/kursya.html";
+        String requestUrlTabB = "http://www.nbp.pl/kursy/kursyb.html";
+        try {
+            Pair<String, Integer> responseA = getHttpResponse(requestUrlTabA);
+            Pair<String, Integer> responseB = getHttpResponse(requestUrlTabB);
+            String responseStringA = responseA.getKey();
+            String responseStringB = responseB.getKey();
+            Integer returnCodeA = responseA.getValue();
+            Integer returnCodeB = responseB.getValue();
+            String responseString = responseStringA + responseStringB;
+
+            checkReturnCode(returnCodeA, responseStringA);
+            checkReturnCode(returnCodeB, responseStringB);
+
+            Pattern p = Pattern.compile("\">([0-9]+) " + this.currency + "<\\/td><td class=\"bgt.{0,2} right\">([0-9,]+)");
+            Matcher m = p.matcher(responseString);
+            boolean b = m.find();
+
+            String countStr = m.group(1);
+            String valueStr = m.group(2).replace(',', '.');
+            Double value = new Double(valueStr);
+            Integer count = new Integer(countStr);
+
+            return value / count;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
 
     }
