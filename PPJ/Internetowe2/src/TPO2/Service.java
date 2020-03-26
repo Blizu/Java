@@ -1,12 +1,17 @@
 package TPO2;
 
 import javafx.util.Pair;
+
+import javax.security.auth.login.Configuration;
 import java.net.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.util.Currency;
+import java.util.Locale;
 public class Service {
 
     private String nazwaKraju;
@@ -14,10 +19,45 @@ public class Service {
 
     public Service(String string) {
             this.nazwaKraju = string;
-            this.currency = getCurrencyForCountry(nazwaKraju);
+            this.currency = getCurrencyForCountry2(nazwaKraju);
     }
 
-    public String getCurrencyForCountry(String nazwaKraju){
+
+    private Map<String, String> getAvailableCurrencies() {
+
+        Locale locale = new Locale("en_US");
+        Locale.setDefault(locale);
+
+
+        Locale[] localesTab = locale.getAvailableLocales();
+
+
+        Map<String, String> currencies = new TreeMap<>();
+        for (Locale loc : localesTab) {
+            try {
+                currencies.put(loc.getDisplayCountry(),
+                        Currency.getInstance(loc).getCurrencyCode());
+            } catch (Exception e) {
+
+            }
+        }
+        return currencies;
+    }
+
+    public String getCurrencyForCountry2(String nazwaKraju){
+
+        Map<String, String> currencies = getAvailableCurrencies();
+        for (String country : currencies.keySet()) {
+
+            if (country.equals(nazwaKraju)) {
+                return currencies.get(country);
+            }
+        }
+        return null;
+    }
+
+
+    /*public String getCurrencyForCountry(String nazwaKraju){
 
         String urlAddressCountryCode = "https://supply-xml.booking.com/hotels/xml/countries";
 
@@ -52,7 +92,7 @@ public class Service {
             e.printStackTrace();
             return null;
         }
-    }
+    }*/
 
     public Pair<String, Integer> getHttpResponse(String requestUrl) throws IOException {
         try {
@@ -110,7 +150,7 @@ public class Service {
     }
 
     public Double getRateFor(String base) {
-        String requestUrl = "https://api.exchangeratesapi.io/latest?base=" + base + "&symbols=" + this.currency;
+        String requestUrl = "https://api.exchangeratesapi.io/latest?base=" + this.currency + "&symbols=" + base;
         try {
             Pair<String, Integer> response = getHttpResponse(requestUrl);
             String responseString = response.getKey();
@@ -122,7 +162,7 @@ public class Service {
                 checkReturnCode(returnCode, responseString);
             }
 
-            Pattern p = Pattern.compile(".*" + this.currency + "\\\":([0-9]+\\.[0-9]+)}.*");
+            Pattern p = Pattern.compile(".*" + base + "\\\":([0-9]+\\.[0-9]+)}.*");
             Matcher m = p.matcher(responseString);
             boolean b = m.matches();
             String value = m.group(1);
@@ -168,8 +208,14 @@ public class Service {
             e.printStackTrace();
         }
         return null;
-
     }
+
+    public String getDescriptionFromWikipedia(String nazwaMiasta){
+        String city = nazwaMiasta;
+        String output = "https://en.wikipedia.org/wiki/"+city;
+        return output;
+    }
+
 }
 
 
