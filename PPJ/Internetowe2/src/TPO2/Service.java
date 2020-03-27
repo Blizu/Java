@@ -2,7 +2,7 @@ package TPO2;
 
 import javafx.util.Pair;
 
-import javax.security.auth.login.Configuration;
+
 import java.net.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -28,9 +28,7 @@ public class Service {
         Locale locale = new Locale("en_US");
         Locale.setDefault(locale);
 
-
         Locale[] localesTab = locale.getAvailableLocales();
-
 
         Map<String, String> currencies = new TreeMap<>();
         for (Locale loc : localesTab) {
@@ -44,19 +42,17 @@ public class Service {
         return currencies;
     }
 
-    public String getCurrencyForCountry2(String nazwaKraju){
-
+    public String getCurrencyForCountry2(String nazwaKraju) throws CurrencyNotFoundException{
         Map<String, String> currencies = getAvailableCurrencies();
-        for (String country : currencies.keySet()) {
 
-            if (country.equals(nazwaKraju)) {
+        for (String country : currencies.keySet()) {
+            if (country.equals(nazwaKraju))
                 return currencies.get(country);
-            }
         }
         return null;
     }
 
-
+    // Nie usuwam poniżej metody, bo też działa i jestem z niej dumny.
     /*public String getCurrencyForCountry(String nazwaKraju){
 
         String urlAddressCountryCode = "https://supply-xml.booking.com/hotels/xml/countries";
@@ -203,7 +199,7 @@ public class Service {
             Double value = new Double(valueStr);
             Integer count = new Integer(countStr);
 
-            return value / count;
+            return count / value;
         } catch (IOException e) {
             e.printStackTrace();
         }
