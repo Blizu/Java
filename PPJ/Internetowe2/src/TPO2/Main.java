@@ -121,10 +121,10 @@ public class Main extends Application {
             result.ifPresent(country2 -> System.out.println(country2));
 
             Optional<String> result2 = dialogCity.showAndWait();
-            result2.ifPresent(city2 -> city=city2);
+            result2.ifPresent(city2 -> System.out.println(city2));
 
             Optional<String> result3 = dialogbaseCurrency.showAndWait();
-            result3.ifPresent(currency2 -> baseCurrency=currency2);
+            result3.ifPresent(currency2 -> System.out.println(currency2));
 
         });
 
