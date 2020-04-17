@@ -39,7 +39,7 @@ public class Client extends Thread { //Klient jest zarówno serwerem jak i klien
         }
 
 
-        //miejsce na GUI
+        //miejsce na GUI - na zajęcia będzie gotowe
 
     }
 
@@ -63,28 +63,26 @@ public class Client extends Thread { //Klient jest zarówno serwerem jak i klien
                 Socket clientSocket = new Socket(serverIP, destinationPort);
                 String requestForServer = "show dictionary servers";
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                BufferedReader clientSocketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                PrintWriter clientSocketOut = new PrintWriter(clientSocket.getOutputStream(), true);
 
-                out.println(requestForServer);
-                System.out.println("Sending: " +"{"+requestForServer + "}"+" from port " + clientSocket.getLocalPort() +" to port "+destinationPort);
+                clientSocketOut.println(requestForServer);
+                System.out.println("Sending: " +requestForServer +" from port " + clientSocket.getLocalPort() +" to port "+destinationPort);
 
-                String result = in.readLine();
+                String result = clientSocketIn.readLine();
                 String[] tableOfAvailableLanguages = result.split(",");
 
                 clientSocket.close();
-                in.close();
-                out.close();
+                clientSocketIn.close();
+                clientSocketOut.close();
 
-                if ("Bad requestForServer".equals(result)) {
+                if ("Bad request for server".equals(result)) {
                     throw new IOException("Sent wrong requestForServer");
-                } else if ("Internal Error.".equals(result)) {
-                    throw new IOException("Internal Error ");
+                } else if ("internal error".equals(result)) {
+                    throw new IOException("Internal Error");
                 } else {
-
                     return tableOfAvailableLanguages;
                 }
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -92,6 +90,7 @@ public class Client extends Thread { //Klient jest zarówno serwerem jak i klien
     }
 
     public static void displayAnswer(String[] tab){
+
         System.out.print("Answer from server: ");
         for (int i=0; i<tab.length; i++){
             System.out.print(tab[i]+",");
@@ -100,6 +99,7 @@ public class Client extends Thread { //Klient jest zarówno serwerem jak i klien
     }
 
     public String translateWord(String word, String languageCode, int clientListeningPort) throws TranslationException {
+
         String translatedWord = "";
             try{
 
@@ -129,7 +129,7 @@ public class Client extends Thread { //Klient jest zarówno serwerem jak i klien
                 resultIn.close();
                 resultOut.close();
 
-                if("Translation Not Found".equals(translatedWord)) {
+                if("translation not found".equals(translatedWord)) {
                     throw new TranslationException("Translation Not Found for: " + word);
                 }
             }

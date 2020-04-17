@@ -106,7 +106,7 @@ public class DictionaryServer extends Thread {
                 else {
                     System.out.println("Translation not found for: " + polishWord);
 
-                    languageOut.println("Translation not found");
+                    languageOut.println("translation not found");
                 }
                 languageOut.close();
                 languageSocket.close();

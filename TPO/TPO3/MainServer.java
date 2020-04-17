@@ -96,24 +96,25 @@ public class MainServer extends Thread {
                 if (dictionaryServers.containsKey(languageCode)) {
                     int LanguageServerPort = dictionaryServers.get(languageCode);
 
-                    Socket languageSocket = new Socket(mainServerIP, LanguageServerPort);
-                    PrintWriter languageOut = new PrintWriter(languageSocket.getOutputStream(), true);
-                    BufferedReader LanguageIn = new BufferedReader(new InputStreamReader(languageSocket.getInputStream()));
+                    Socket translationSocket = new Socket(mainServerIP, LanguageServerPort);
+                    PrintWriter translationOut = new PrintWriter(translationSocket.getOutputStream(), true);
+                    BufferedReader translationIn = new BufferedReader(new InputStreamReader(translationSocket.getInputStream()));
 
                     try {
-                        String sendRequest = String.join(",", polishWord, destinationPort);
-                        System.out.println("Sending request to Dictionary Server: {" + sendRequest + "}");
 
-                        languageOut.println(sendRequest);
+                        String sendRequest = String.join(",", polishWord, destinationPort);
+                        System.out.println("Sending request to Dictionary Server: " + sendRequest);
+
+                        translationOut.println(sendRequest);
                         out.println("Got translate request");
 
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        out.println("Internal Error.");
+                        out.println("internal error");
                     }
-                    languageSocket.close();
-                    languageOut.close();
-                    LanguageIn.close();
+                    translationSocket.close();
+                    translationOut.close();
+                    translationIn.close();
 
                 } else {
                     out.println("This language is not supported");
@@ -126,6 +127,7 @@ public class MainServer extends Thread {
               //  int[] portTab = new int [dictionaryServers.size()];
 
                 int i = 0;
+
                 for (String language: dictionaryServers.keySet()) {
                     System.out.println("key "+language +" value "+dictionaryServers.get(language));
                     languagesTab[i++] = language;
@@ -137,8 +139,8 @@ public class MainServer extends Thread {
                 out.println(joinedLanguages);
 
             } else {
-                out.println("Bad request");
-                System.out.println("Bad request");
+                out.println("Bad request for server");
+                System.out.println("Bad request for server");
             }
 
             in .close();
