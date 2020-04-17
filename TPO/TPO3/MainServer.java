@@ -9,11 +9,12 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainServer {
+public class MainServer extends Thread {
 
     private String mainServerIP;
     private int mainServerPort;
-    private Map<String, Integer> dictionaryServer = new HashMap<String,Integer>();
+    private Map<String, Integer> dictionaryServers = new HashMap <String, Integer > ();
+   
 
     public MainServer(String serverIP, int serverPort) {
         this.mainServerIP = serverIP;
@@ -27,11 +28,41 @@ public class MainServer {
         //dictionaryServer 50003 - n
 
         MainServer mainServer = new MainServer("127.0.0.1",50001);
-        mainServer.run();
+        mainServer.registerDictionaryServer(50003);
+        mainServer.start();
 
     }
 
-    public void run() {
+    public void registerDictionaryServer(int dictionaryServerPort){
+
+        Map < String, Integer > availableDictionaryServer = new HashMap <String, Integer>();
+        PrintWriter out;
+        BufferedReader in;
+        String request = "hello";
+
+        for (int i = dictionaryServerPort; i <= (dictionaryServerPort+1); i++) {
+
+            try {
+                System.out.print("Start looking for Dictionary Server...");
+
+                Socket clientSocketForMainServer = new Socket(mainServerIP, i);
+                out = new PrintWriter(clientSocketForMainServer.getOutputStream(), true);
+                in = new BufferedReader(new InputStreamReader(clientSocketForMainServer.getInputStream()));
+
+                out.println(request);
+                String language = in .readLine();
+
+                System.out.println(language + " server found on port: " + i );
+                availableDictionaryServer.put(language, i);
+
+            } catch (IOException e) {
+                System.out.println("Dictionary Server not found on port: {" + i + "}");
+            }
+        }
+        this.dictionaryServers = availableDictionaryServer;
+    }
+
+    public void run() { // punkt wejścia wątku
         try {
             runMainServer();
         } catch (IOException e) {
@@ -43,21 +74,71 @@ public class MainServer {
         boolean flag = true;
 
         ServerSocket serverSocket = new ServerSocket(mainServerPort);
-        System.out.println("Server is listening on port: " + mainServerPort);
+        System.out.println("Main Server is listening on port: " + serverSocket.getLocalPort());
 
         do{
             Socket clientSocket = serverSocket.accept();
-            System.out.println("Client accepted");
+
+          System.out.println("Client accepted - source port: "+ clientSocket.getPort());
 
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
             String inputLine = in.readLine();
-          //  String[] query = inputLine.split(",");
 
-            if("show dictionary servers".equals(inputLine)) {
+            String[] requestTab = inputLine.split(",");
+
+            if (requestTab.length == 3) {
+                String polishWord = requestTab[0];
+                String languageCode = requestTab[1];
+                String destinationPort = requestTab[2];
+
+                if (dictionaryServers.containsKey(languageCode)) {
+                    int LanguageServerPort = dictionaryServers.get(languageCode);
+
+                    Socket languageSocket = new Socket(mainServerIP, LanguageServerPort);
+                    PrintWriter languageOut = new PrintWriter(languageSocket.getOutputStream(), true);
+                    BufferedReader LanguageIn = new BufferedReader(new InputStreamReader(languageSocket.getInputStream()));
+
+                    try {
+                        String sendRequest = String.join(",", polishWord, destinationPort);
+                        System.out.println("Sending request to Dictionary Server: {" + sendRequest + "}");
+
+                        languageOut.println(sendRequest);
+                        out.println("Got translate request");
+
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        out.println("Internal Error.");
+                    }
+                    languageSocket.close();
+                    languageOut.close();
+                    LanguageIn.close();
+
+                } else {
+                    out.println("This language is not supported");
+                }
+            }
+            else if ("show dictionary servers".equals(inputLine)) {
                 System.out.println("Get request: " + inputLine);
-                out.println("no servers available");
+
+                String[] languagesTab = new String[dictionaryServers.size()];
+              //  int[] portTab = new int [dictionaryServers.size()];
+
+                int i = 0;
+                for (String language: dictionaryServers.keySet()) {
+                    System.out.println("key "+language +" value "+dictionaryServers.get(language));
+                    languagesTab[i++] = language;
+                    // portTab[i++] = dictionaryServers.get(language);
+                }
+
+                String joinedLanguages = String.join(",", languagesTab);
+                System.out.println("Sending " + joinedLanguages +"\n");
+                out.println(joinedLanguages);
+
+            } else {
+                out.println("Bad request");
+                System.out.println("Bad request");
             }
 
             in .close();
@@ -66,22 +147,16 @@ public class MainServer {
 
         }while(flag);
 
-        System.out.println("Closing Server");
+        System.out.println("Closing Main Server");
         serverSocket.close();
 
     }
-
-    public static void setDictionaryServer(){
-
-    }
-
+    
     public String getMainServerIP(){
         return mainServerIP;
     }
     public int getMainServerPort(){
         return mainServerPort;
     }
-
-
-
+    
 }
