@@ -1,5 +1,13 @@
 package zad1;
 
+
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,12 +15,17 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Client extends Thread { //Klient jest zarówno serwerem jak i klientem
+
+public class Client extends Application { //Klient jest zarówno serwerem jak i klientem
 
     private String serverIP;
     private int clientListeningPort;
     private int destinationPort;
 
+    public Client(){
+        //clientListeningPort=50002;
+
+    }
 
     public Client(String IP,int clientPort ,int serverPort){
         this.serverIP=IP;
@@ -21,14 +34,11 @@ public class Client extends Thread { //Klient jest zarówno serwerem jak i klien
     }
 
     public static void main (String[] args){
+        //Client client = new Client("127.0.0.1",50002,50001);
 
-        Client client = new Client("127.0.0.1",50002,50001);
-
-
-        for (int i=0; i<2; i++){
+       /* for (int i=0; i<2; i++){
             displayAnswer(client.getAvailableDictionaryServer());
         }
-
 
         try {
             String translatedWord = client.translateWord("kwarantanna","FR",client.clientListeningPort);
@@ -36,12 +46,134 @@ public class Client extends Thread { //Klient jest zarówno serwerem jak i klien
 
         } catch (TranslationException e) {
             e.printStackTrace();
-        }
+        }*/
 
-
-        //miejsce na GUI - na zajęcia będzie gotowe
+        launch(args);
 
     }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+
+        Client client1 = new Client("127.0.0.1",50002,50001);
+
+        VBox vbox = new VBox();
+
+
+        // Wybieranie serwera
+
+        Label label1 = new Label("Wybierz język docelowy:");
+
+        ComboBox availableDictionaryServersComboBox = new ComboBox();
+
+
+        availableDictionaryServersComboBox.setPrefSize(800, 150);
+
+
+        try {
+            availableDictionaryServersComboBox.getItems().clear();
+            String[] serversTab = client1.getAvailableDictionaryServer();
+
+            for(String i : serversTab) {
+                availableDictionaryServersComboBox.getItems().add(i);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        // Wpisywanie słowa
+
+        Label label2 = new Label("Słowo do przetłumaczenia:");
+
+        TextField inputText = new TextField();
+        inputText.setPrefSize(800, 100);
+
+
+
+        // Przycisk rozpoczynający tłumaczenie
+
+        Button button = new Button("Tłumacz!");
+        button.setPrefSize(800,100);
+
+
+        // Efekt tłumaczenia
+
+        Label label3 = new Label("Tłumaczenie:");
+
+        TextField outputText = new TextField();
+        outputText.setPrefSize(800,100);
+
+        outputText.setEditable(false);
+
+        // Dodanie elementów do VBOX
+
+        vbox.getChildren().add(label1);
+        vbox.getChildren().add(availableDictionaryServersComboBox);
+        vbox.getChildren().add(label2);
+        vbox.getChildren().add(inputText);
+        vbox.getChildren().add(button);
+        vbox.getChildren().add(label3);
+        vbox.getChildren().add(outputText);
+
+        // Scena i primaryStage
+
+        Scene scene = new Scene(vbox, 600, 800);
+
+        primaryStage.setTitle("Aplikacja TPO3");
+        primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
+        primaryStage.show();
+
+        button.setOnAction((event) ->{
+
+            String selectedServer = (String) availableDictionaryServersComboBox.getValue();
+
+            if (selectedServer.equals("") || selectedServer == null){
+
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setContentText("Nie wybrano języka!.");
+                alert.showAndWait();
+                return;
+            }
+
+            String polishWord = inputText.getText();
+
+            if ("".equals(polishWord) || polishWord.contains(" ") || polishWord == null){
+
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setContentText("Pole nie może być puste i nie może zawierać spacji.");
+                alert.showAndWait();
+
+            }
+
+            try {
+                String resultWord = translateWord(polishWord,selectedServer,client1);
+                inputText.setText("");
+                outputText.setText(resultWord);
+
+            }catch(TranslationException e) {
+                inputText.setText("");
+                outputText.setText("");
+
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Warning");
+                alert.setHeaderText("Brak tłumaczenia: " + polishWord + " dla: " + selectedServer);
+                alert.showAndWait();
+
+            }catch(Exception ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Wystąpił błąd podczas przetwarzania");
+                alert.showAndWait();
+                System.out.println(ex);
+            }
+        });
+    }
+
+
 
     public int getClientPort(){
         return this.clientListeningPort;
@@ -50,11 +182,13 @@ public class Client extends Thread { //Klient jest zarówno serwerem jak i klien
     public int getDestinationPort(){
         return this.destinationPort;
     }
+    public String getServerIP(){
+        return this.serverIP;
+    }
 
     public void setClientListeningPort(int port){
         this.clientListeningPort = port;
     }
-
 
 
     public String[] getAvailableDictionaryServer() {
@@ -98,7 +232,11 @@ public class Client extends Thread { //Klient jest zarówno serwerem jak i klien
         System.out.println(" ");
     }
 
-    public String translateWord(String word, String languageCode, int clientListeningPort) throws TranslationException {
+    public String translateWord(String word, String languageCode, Client client) throws TranslationException {
+
+        String serverIP=getServerIP();
+        int clientListeningPort = client.getClientPort();
+        int destinationPort = client.getDestinationPort();
 
         String translatedWord = "";
             try{
@@ -148,4 +286,6 @@ public class Client extends Thread { //Klient jest zarówno serwerem jak i klien
         return translatedWord;
     }
 
+
 }
+
