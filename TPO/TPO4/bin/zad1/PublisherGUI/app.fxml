@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="zad1.PublisherGUI.PublisherController">
+   <children>
+      <Label layoutX="200.0" layoutY="14.0" text="Nowy temat" />
+      <TextField fx:id="topicTextField" layoutX="14.0" layoutY="49.0" prefHeight="31.0" prefWidth="400.0" />
+      <Button layoutX="430.0" layoutY="52.0" mnemonicParsing="false" onAction="#addTopic" text="Dodaj temat" />
+      <Label fx:id="topicLabel" layoutX="14.0" layoutY="97.0" text="Temat zostal dodany" />
+      <Label layoutX="195.0" layoutY="130.0" text="Aktualizacja tematu" />
+      <Button layoutX="487.0" layoutY="330.0" mnemonicParsing="false" onAction="#addNews" text="Wyslij aktualizacje" />
+      <Label fx:id="newsLabel" layoutX="17.0" layoutY="374.0" text="Aktualizacja zostala‚ wyslana" />
+      <TextField fx:id="newsTopicTextField" layoutX="84.0" layoutY="172.0" prefHeight="31.0" prefWidth="386.0" />
+      <TextArea fx:id="newsTextArea" layoutX="16.0" layoutY="211.0" prefHeight="154.0" prefWidth="455.0" />
+      <Label layoutX="15.0" layoutY="177.0" text="Temat" />
+   </children>
+</AnchorPane>
