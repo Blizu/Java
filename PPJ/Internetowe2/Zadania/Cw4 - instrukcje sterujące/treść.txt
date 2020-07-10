@@ -1,0 +1,69 @@
+Problem 01
+
+ 
+
+Dana jest zmienna typu boolean czyPada zainicjowana wartością true. Napisz program sprawdzający stan tej zmiennej i wyświetlający stosowny komunikat na ekran (wykorzystaj instrukcję warunkową if).
+
+ 
+
+Problem 02, 03, 04, 05
+
+Ze względu na wzory matematyczne znajduje się w załączonym pdf
+
+ 
+
+Problem 06
+
+Sprawdź jaki będzie rezultat poniższego programu:
+
+ 
+
+int x = 4; 
+
+long y = x * 4 - x++; 
+
+if(y<12) 
+
+    System.out.println("za malo"); 
+
+else 
+
+    System.out.println("w sam raz");
+
+ 
+
+Odpowiedź uzasadnij.
+
+ 
+
+Problem 07
+
+Napisz program wyświetlający wartości od 1 do 10. Wykorzystaj w tym celu pętle.
+
+ 
+
+Dana jest zmienna int wrt. Zmodyfikuj przygotowany program, tak aby wyświetlał wartości będące wynikiem mnożenia kolejnej wartości zmiennej pętli i zmiennej wrt.
+
+ 
+
+Problem 08
+
+Napisz program wyświetlający wszystkie liczby podzielne bez reszty przez 3 i 2 z przedziału od -1500 do 1500.
+
+ 
+
+Problem 09
+
+Napisz program, który wykorzystując pętle utworzy trójkąt składający się z literału *, jak na poniższym przykładzie:
+
+ 
+
+*
+
+**
+
+***
+
+****
+
+*****
